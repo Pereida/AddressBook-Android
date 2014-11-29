@@ -37,6 +37,4 @@ public class Contact {
         return "test@testemail.com";
     }
 
-
-
 }
