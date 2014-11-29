@@ -21,4 +21,22 @@ public class Contact {
         return "TestLastName";
     }
 
+    public String getPhoneNumber(){
+        return "+52 474-332-323";
+    }
+
+    public String getMobileNumber(){
+        return "+358 23-323-444";
+    }
+
+    public String getAddress(){
+        return "Jamerantaival 5, Espoo";
+    }
+
+    public String getEmail(){
+        return "test@testemail.com";
+    }
+
+
+
 }
