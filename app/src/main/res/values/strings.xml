@@ -4,5 +4,18 @@
     <string name="app_name">MCC Contacts</string>
     <string name="action_settings">Settings</string>
     <string name="action_refresh">Refresh</string>
+    <string name="title_activity_contact_view">ContactView</string>
+    <string name="FirstName">Name</string>
+    <string name="LastName">Last Name</string>
+    <string name="MobilePhone">Mobile</string>
+    <string name="PhoneNumber">Phone</string>
+    <string name="Email">Email</string>
+    <string name="Address">Address</string>
+    <string name="cvName">Cesar</string>
+    <string name="cvLastName">Pereida</string>
+    <string name="cvMobile">+52 474-32-444</string>
+    <string name="cvPhone">+52 474-32-444</string>
+    <string name="cvEmail">cesar.pereida@gmail.com</string>
+    <string name="cvAddress">Calle del puerto azul 344 Norte</string>
 
 </resources>

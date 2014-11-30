@@ -4,13 +4,30 @@ package mcc.mcccontacts;
  * Created by eduardocastellanosn on 11/29/14.
  */
 public class Contact {
-    public Contact(){
 
+    private String sFirstName;
+    private String sLastName;
+    private String sId;
+
+    public Contact(){
+        this.sFirstName = "Cesar";
+        this.sLastName = "Pereida";
+    }
+
+    public Contact(String name, String lastname)
+    {
+        this.sFirstName = name;
+        this.sLastName = lastname;
+        this.sId = "testID";
     }
 
     public String getName(){
 
-        return "TestName";
+        return this.sFirstName;
+    }
+
+    public String getId(){
+        return this.sId;
     }
 
     public String getFullName(){
@@ -18,7 +35,7 @@ public class Contact {
     }
 
     public String getLastName(){
-        return "TestLastName";
+        return this.sLastName;
     }
 
     public String getPhoneNumber(){
@@ -35,6 +52,11 @@ public class Contact {
 
     public String getEmail(){
         return "test@testemail.com";
+    }
+
+    public String toString()
+    {
+        return this.getFullName();
     }
 
 }
