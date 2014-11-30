@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.view.Menu;
@@ -15,6 +17,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ContactView extends Activity {
@@ -65,6 +79,7 @@ public class ContactView extends Activity {
         //noinspection SimplifiableIfStatement
         switch (id){
             case R.id.action_delete:
+                RemoveContact();
                 msg = "Deleting contact.";
                 break;
             case R.id.action_save:
@@ -173,5 +188,53 @@ public class ContactView extends Activity {
             return false;
         }
 
+    }
+
+    private void RemoveContact()
+    {
+        (new RemoveContacts()).execute("http://cloudguest116.niksula.hut.fi:8080/contacts/");
+    }
+
+    // Remove Contacts Async Task
+    public class RemoveContacts extends AsyncTask<String, String, String> {
+
+        // Dialog for the screen
+        private final ProgressDialog dialog = new ProgressDialog(ContactView.this);
+
+        // Print "Deleting contact..." on Pre-execution
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.setMessage("Deleting contact...");
+            dialog.show();
+        }
+
+        // Dialog dismissed and activity deleted
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            dialog.dismiss();
+            finish();
+        }
+
+        // In background used the Id previously captured and send the DELETE request
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                URL u = new URL(params[0] + id);                                    // Url + Id of the contact
+                HttpURLConnection conn = (HttpURLConnection) u.openConnection();    // Http connection created
+                conn.setRequestMethod("DELETE");                                    // Set request Method
+                conn.getInputStream();
+
+                if (conn != null) {
+                    conn.disconnect();                                              // Http connection closed
+                }
+            }
+            catch(Throwable t) {
+                t.printStackTrace();
+            }
+            return null;
+        }
     }
 }

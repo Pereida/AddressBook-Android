@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,8 +30,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-
 
 
 public class MainActivity extends Activity {
@@ -65,7 +64,7 @@ public class MainActivity extends Activity {
                 intent.putExtra("email", itemValue.getEmail());
                 intent.putExtra("id", itemValue.getId());
 
-                startActivity(intent);
+                startActivityForResult(intent, 1);
 
             }
         });
@@ -77,7 +76,20 @@ public class MainActivity extends Activity {
         UpdateList();
     }
 
-    private void UpdateList()
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        Log.d("FIRST", "result:" + resultCode);
+        Log.d("FIRST", "request:" + requestCode);
+        switch(requestCode) {
+            case 1:
+                if (resultCode == 0) {
+
+                    UpdateList();
+                }
+                break;
+        }
+    }
+
+    public void UpdateList()
     {
         (new RetrieveContacts()).execute("http://cloudguest116.niksula.hut.fi:8080/contacts/");
     }
@@ -179,6 +191,4 @@ public class MainActivity extends Activity {
             return new Contact(firstName, lastName, email, phoneNumber, mobile, address, id);
         }
     }
-
-
 }
