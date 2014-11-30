@@ -35,6 +35,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="mcc.mcccontacts.MainActivity" />
         </activity>
+        <activity
+            android:name="mcc.mcccontacts.PhoneContacts"
+            android:label="@string/title_activity_phone_contacts" >
+        </activity>
     </application>
 
 </manifest>

@@ -3,19 +3,13 @@ package mcc.mcccontacts;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
-
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -158,6 +152,10 @@ public class MainActivity extends Activity {
             case R.id.action_add:
                 Intent i = new Intent(this, AddContact.class);
                 startActivityForResult(i, 2);
+                return true;
+            case R.id.action_pickcontact:
+                Intent intent = new Intent(this, PhoneContacts.class);
+                startActivityForResult(intent, 10);
                 return true;
         }
 
