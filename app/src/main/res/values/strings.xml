@@ -17,5 +17,6 @@
     <string name="cvPhone">+52 474-32-444</string>
     <string name="cvEmail">cesar.pereida@gmail.com</string>
     <string name="cvAddress">Calle del puerto azul 344 Norte</string>
+    <string name="action_add">Add Contact</string>
 
 </resources>

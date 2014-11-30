@@ -5,4 +5,6 @@
     <item android:id="@+id/action_refresh" android:title="@string/action_refresh"
         android:orderInCategory="100" android:showAsAction="never"
         android:icon="@android:drawable/ic_menu_rotate"/>
+    <item android:id="@+id/action_add" android:title="@string/action_add"
+        android:orderInCategory="100" android:showAsAction="never" />
 </menu>
