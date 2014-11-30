@@ -30,7 +30,7 @@
         <activity
             android:name="mcc.mcccontacts.AddContact"
             android:label="@string/title_activity_add_contact"
-            android:parentActivityName="mcc.mcccontacts.MainActivity" >
+            >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="mcc.mcccontacts.MainActivity" />

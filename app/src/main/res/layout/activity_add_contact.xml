@@ -104,7 +104,8 @@
             android:text="@string/SaveContact"
             android:id="@+id/bSave"
             android:layout_gravity="center_horizontal"
-            android:layout_weight="0.06" />
+            android:layout_weight="0.06"
+            android:clickable="false" />
 
     </LinearLayout>
 </RelativeLayout>

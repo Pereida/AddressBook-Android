@@ -1,16 +1,20 @@
 package mcc.mcccontacts;
 
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 import android.app.Activity;
@@ -87,8 +91,17 @@ public class MainActivity extends Activity {
         switch(requestCode) {
             case 1:
                 if (resultCode == 0) {
-
                     UpdateList();
+                }
+                break;
+            case 2:
+                if (resultCode == RESULT_OK)
+                {
+                    Bundle extras = data.getExtras();
+
+                    AddContact(extras.getString("fname"), extras.getString("lname"),
+                            extras.getString("phone"), extras.getString("mobile"),
+                            extras.getString("email"), extras.getString("addr"));
                 }
                 break;
         }
@@ -104,7 +117,7 @@ public class MainActivity extends Activity {
 
         JSONObject jsonParam = new JSONObject();
         try {
-            jsonParam.put("first_ name", fname);
+            jsonParam.put("first_name", fname);
             jsonParam.put("last_name", lname);
             jsonParam.put("phone", phone);
             jsonParam.put("mobile", mobile);
@@ -144,7 +157,7 @@ public class MainActivity extends Activity {
                 return true;
             case R.id.action_add:
                 Intent i = new Intent(this, AddContact.class);
-                startActivity(i);
+                startActivityForResult(i, 2);
                 return true;
         }
 
@@ -211,6 +224,8 @@ public class MainActivity extends Activity {
                     result.add(convertContact(JArr.getJSONObject(i)));
                 }
 
+                conn.disconnect();
+
                 return result;
             }
             catch(Throwable t) {
@@ -237,30 +252,41 @@ public class MainActivity extends Activity {
 
                 HttpURLConnection conn = (HttpURLConnection) u.openConnection();
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type","application/json");
 
-                conn.connect();
+                conn.setRequestProperty("Content-Type", "application/json");
+
+                conn.setDoOutput(true);
 
                 // Write to the stream
-                DataOutputStream os = new DataOutputStream(conn.getOutputStream());
-                os.writeUTF(URLEncoder.encode(param, "UTF-8"));
+                OutputStreamWriter os = new OutputStreamWriter(conn.getOutputStream());
+
+                os.write(param);
+
                 os.flush();
                 os.close();
 
+                conn.connect();
 
-                // Read the stream
-                InputStream is = conn.getInputStream();
-                byte[] b = new byte[1024];
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                int success = 0;
+                int r = conn.getResponseCode();
 
-                while ( is.read(b) != -1)
-                    baos.write(b);
+                if(r == HttpURLConnection.HTTP_OK)
+                {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(u.openStream()));
+                    StringBuffer res = new StringBuffer();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        res.append(line);
+                    }
+                    reader.close();
 
-                String JSONResp = new String(baos.toByteArray());
-                JSONObject JObject = new JSONObject(JSONResp);
+                    JSONObject JObject = new JSONObject(res.toString());
+                    if(JObject.has("success"))
+                        success = JObject.getInt("success");
 
-                int success;
-                success = JObject.getInt("success");
+                }
+
+
 
                 if(success != 1)
                 {
@@ -276,13 +302,33 @@ public class MainActivity extends Activity {
         }
 
         private Contact convertContact(JSONObject obj) throws JSONException {
-            String firstName = obj.getString("first_name");
-            String lastName = obj.getString("last_name");
-            String email = obj.getString("email");
-            String phoneNumber = obj.getString("phone");
-            String mobile = obj.getString("mobile");
-            String address = obj.getString("address");
-            String id = obj.getString("_id");
+            String firstName = "";
+            if(obj.has("first_name"))
+                firstName = obj.getString("first_name");
+            String lastName = "";
+
+            if(obj.has("last_name"))
+                lastName = obj.getString("last_name");
+            String email = "";
+
+            if(obj.has("email"))
+                email = obj.getString("email");
+            String phoneNumber = "";
+
+            if(obj.has("phone"))
+                phoneNumber = obj.getString("phone");
+            String mobile = "";
+
+            if(obj.has("mobile"))
+                mobile = obj.getString("mobile");
+            String address = "";
+
+            if(obj.has("address"))
+                address = obj.getString("address");
+            String id = "";
+
+            if(obj.has("_id"))
+                id = obj.getString("_id");
 
             return new Contact(firstName, lastName, email, phoneNumber, mobile, address, id);
         }
