@@ -1,13 +1,20 @@
 package mcc.mcccontacts;
 
 import android.app.Activity;
+import android.content.ContentProviderOperation;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 
 
 public class ContactView extends Activity {
@@ -61,7 +68,13 @@ public class ContactView extends Activity {
                 msg = "Deleting contact.";
                 break;
             case R.id.action_save:
-                msg = "Contact saved.";
+                if(saveContact()){
+                    msg = "Contact saved.";
+                }
+                else
+                {
+                    msg = "Error saving contact.";
+                }
                 break;
         }
 
@@ -70,5 +83,95 @@ public class ContactView extends Activity {
         toast.show();
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean saveContact()
+    {
+
+        ArrayList<ContentProviderOperation> ops =
+                new ArrayList<ContentProviderOperation>();
+
+        int rawContactInsertIndex = ops.size();
+
+        ops.add(ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
+                .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null)
+                .build());
+
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                .withValue(
+                        ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
+                        ((TextView) findViewById(R.id.tvFName)).getText())
+                .withValue(
+                        ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME,
+                        ((TextView) findViewById(R.id.tvLName)).getText())
+                .build());
+
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER,
+                        ((TextView) findViewById(R.id.tvMobile)).getText())
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                        ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                .build());
+
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER,
+                        ((TextView) findViewById(R.id.tvPhoneNum)).getText())
+                .withValue(ContactsContract.CommonDataKinds.Phone.TYPE,
+                        ContactsContract.CommonDataKinds.Phone.TYPE_MAIN)
+                .build());
+
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.Email.DATA,
+                        ((TextView) findViewById(R.id.tvEmail)).getText())
+                .withValue(ContactsContract.CommonDataKinds.Email.TYPE,
+                        ContactsContract.CommonDataKinds.Email.TYPE_HOME)
+                .build());
+
+        ops.add(ContentProviderOperation
+                .newInsert(ContactsContract.Data.CONTENT_URI)
+                .withValueBackReference(
+                        ContactsContract.Data.RAW_CONTACT_ID, 0)
+                .withValue(
+                        ContactsContract.Data.MIMETYPE,
+                        ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)
+                .withValue(ContactsContract.CommonDataKinds.StructuredPostal.DATA,
+                        ((TextView) findViewById(R.id.tvAddress)).getText())
+                .withValue(ContactsContract.CommonDataKinds.StructuredPostal.TYPE,
+                        ContactsContract.CommonDataKinds.StructuredPostal.TYPE_HOME)
+                .build());
+
+        try{
+            getContentResolver().applyBatch(ContactsContract.AUTHORITY, ops);
+            return true;
+        } catch (Exception ex)
+        {
+            return false;
+        }
+
     }
 }
