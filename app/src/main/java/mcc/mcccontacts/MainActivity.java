@@ -1,19 +1,35 @@
 package mcc.mcccontacts;
 
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+
 import android.content.Intent;
+
+import android.os.AsyncTask;
 import android.os.Bundle;
+
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.Toast;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 
 
@@ -36,8 +52,6 @@ public class MainActivity extends Activity {
             public void onItemClick(AdapterView<?> arg0, View arg1,
                                     int position, long arg3) {
 
-                int itemPosition = position;
-
                 // ListView Clicked item value
                 Contact itemValue = (Contact) mainListView.getItemAtPosition(position);
 
@@ -56,8 +70,17 @@ public class MainActivity extends Activity {
             }
         });
 
+        alContact = new ArrayList<Contact>();
+        listAdapter = new ArrayAdapter<Contact>(this, R.layout.simplerow, alContact);
+        mainListView.setAdapter(listAdapter);
+
+        UpdateList();
     }
 
+    private void UpdateList()
+    {
+        (new RetrieveContacts()).execute("http://cloudguest116.niksula.hut.fi:8080/contacts/");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,23 +89,6 @@ public class MainActivity extends Activity {
         return true;
     }
 
-    private void dummyUpdate()
-    {
-
-        Contact[] contactsArray = new Contact[]{new Contact("Eduardo", "Castellanos"), new Contact()};
-        alContact = new ArrayList<Contact>();
-        alContact.addAll(Arrays.asList(contactsArray));
-        updateUI();
-    }
-
-    private void updateUI() {
-        // Update the UI after the contacts are updated.
-        if(alContact != null)
-        {
-            listAdapter = new ArrayAdapter<Contact>(this, R.layout.simplerow, alContact);
-            mainListView.setAdapter(listAdapter);
-        }
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -94,7 +100,7 @@ public class MainActivity extends Activity {
         //
         switch(id) {
             case R.id.action_refresh:
-                dummyUpdate();
+                UpdateList();
                 return true;
             case R.id.action_settings:
                 return true;
@@ -102,4 +108,77 @@ public class MainActivity extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public class RetrieveContacts extends AsyncTask<String, Void, List<Contact>>{
+
+        private final ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+
+        @Override
+        protected void onPostExecute(List<Contact> result) {
+            super.onPostExecute(result);
+            dialog.dismiss();
+            listAdapter.clear();
+            if(result != null)
+                listAdapter.addAll(result);
+            listAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.setMessage("Downloading contacts...");
+            dialog.show();
+        }
+
+        protected List<Contact> doInBackground(String... params) {
+
+            List<Contact> result = new ArrayList<Contact>();
+
+            try {
+                URL u = new URL(params[0]);
+
+                HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+                conn.setRequestMethod("GET");
+
+                conn.connect();
+                InputStream is = conn.getInputStream();
+
+                // Read the stream
+                byte[] b = new byte[1024];
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+                while ( is.read(b) != -1)
+                    baos.write(b);
+
+                String JSONResp = new String(baos.toByteArray());
+                JSONObject JObject = new JSONObject(JSONResp);
+
+                JSONArray JArr = JObject.getJSONArray("contacts");
+
+                for (int i=0; i < JArr.length(); i++) {
+                    result.add(convertContact(JArr.getJSONObject(i)));
+                }
+
+                return result;
+            }
+            catch(Throwable t) {
+                t.printStackTrace();
+            }
+            return null;
+        }
+
+        private Contact convertContact(JSONObject obj) throws JSONException {
+            String firstName = obj.getString("first_name");
+            String lastName = obj.getString("last_name");
+            String email = obj.getString("email");
+            String phoneNumber = obj.getString("phone");
+            String mobile = obj.getString("mobile");
+            String address = obj.getString("address");
+            String id = obj.getString("_id");
+
+            return new Contact(firstName, lastName, email, phoneNumber, mobile, address, id);
+        }
+    }
+
+
 }

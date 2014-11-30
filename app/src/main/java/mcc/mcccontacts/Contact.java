@@ -1,10 +1,12 @@
 package mcc.mcccontacts;
 
+import java.io.Serializable;
+
 /**
  * Created by eduardocastellanosn on 11/29/14.
  */
-public class Contact {
-    public Contact(){
+public class Contact implements Serializable{
+    public Contact(){}
 
     private String firstName;
     private String lastName;
