@@ -18,5 +18,8 @@
     <string name="cvEmail">cesar.pereida@gmail.com</string>
     <string name="cvAddress">Calle del puerto azul 344 Norte</string>
     <string name="action_add">Add Contact</string>
+    <string name="title_activity_add_contact">AddContact</string>
+    <string name="SaveContact">Save Contact</string>
+    <string name="RESTURI">http://cloudguest116.niksula.hut.fi:8080/contacts/</string>
 
 </resources>
