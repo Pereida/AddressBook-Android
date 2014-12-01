@@ -1,6 +1,5 @@
 package mcc.mcccontacts;
 
-
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -8,17 +7,22 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 
 import android.content.Intent;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -98,7 +102,76 @@ public class MainActivity extends Activity {
                             extras.getString("email"), extras.getString("addr"));
                 }
                 break;
+            case 10:
+                if (resultCode == RESULT_OK) {
+                    String id;
+                    Uri contactData = data.getData();
+                    Cursor cursor =  getContentResolver().query(contactData, null, null, null, null);
+
+                    if (cursor.moveToFirst()) {
+                        id = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                        Map<String, String> info = getContactInfoFromId(id);
+                        AddContact(info.get("fname"), info.get("lname"), info.get("phone"),
+                                info.get("mobile"), info.get("email"), info.get("addr"));
+                    }
+                    cursor.close();
+
+                }
         }
+    }
+
+    private Map<String, String> getContactInfoFromId(String id){
+
+        Map<String, String> result = new HashMap<String, String>();
+
+        Cursor cursor = getApplicationContext().getContentResolver().query(
+                ContactsContract.Data.CONTENT_URI, null,
+                ContactsContract.Data.CONTACT_ID + "='" + id + "'", null, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String mime = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
+                if(mime.equals(
+                        ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)) {
+                    result.put("fname", cursor.getString(cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME)));
+                    result.put("lname", cursor.getString(cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME)));
+
+                } else if(mime.equals(
+                    ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_ITEM_TYPE)) {
+                    result.put("addr", cursor.getString(cursor.getColumnIndex(
+                            ContactsContract.CommonDataKinds.StructuredPostal.DATA)));
+
+                } else if(mime.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
+
+                    if(ContactsContract.CommonDataKinds.Email.TYPE_HOME ==
+                            cursor.getInt(cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds.Email.TYPE
+                            ))) {
+                        result.put("email", cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Email.DATA
+                        )));
+                    }
+
+                } else if(mime.equals( ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)) {
+                    if (ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE ==
+                            cursor.getInt(cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds.Phone.TYPE))) {
+                        result.put("mobile", cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER)));
+                    }
+                    else if (ContactsContract.CommonDataKinds.Phone.TYPE_MAIN ==
+                            cursor.getInt(cursor.getColumnIndex(
+                                    ContactsContract.CommonDataKinds.Phone.TYPE))) {
+                        result.put("phone", cursor.getString(cursor.getColumnIndex(
+                                ContactsContract.CommonDataKinds.Phone.NUMBER)));
+                    }
+                }
+            }
+            cursor.close();
+        }
+        return result;
     }
 
     public void UpdateList()
@@ -154,7 +227,7 @@ public class MainActivity extends Activity {
                 startActivityForResult(i, 2);
                 return true;
             case R.id.action_pickcontact:
-                Intent intent = new Intent(this, PhoneContacts.class);
+                Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
                 startActivityForResult(intent, 10);
                 return true;
         }
@@ -170,12 +243,12 @@ public class MainActivity extends Activity {
         protected void onPostExecute(List<Contact> result) {
             super.onPostExecute(result);
             dialog.dismiss();
-            if(this.task == "get") {
+            if(this.task.equals("get")) {
                 listAdapter.clear();
                 if (result != null)
                     listAdapter.addAll(result);
                 listAdapter.notifyDataSetChanged();
-            } else if (this.task == "post")
+            } else if (this.task.equals("post"))
             {
                 if(result != null){
                     dialog.setMessage("Contact added!");
@@ -234,9 +307,9 @@ public class MainActivity extends Activity {
 
         protected List<Contact> doInBackground(String... params) {
             this.task = params[0];
-            if(this.task == "get") {
+            if(this.task.equals("get")) {
                 return doGet();
-            } else if (this.task == "post") {
+            } else if (this.task.equals("post")) {
                 return doPost(params[1]);
             }
             return null;
@@ -283,8 +356,6 @@ public class MainActivity extends Activity {
                         success = JObject.getInt("success");
 
                 }
-
-
 
                 if(success != 1)
                 {
