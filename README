@@ -1,0 +1,59 @@
+MCC Android Address Book 
+
+The Address Book Android App here presented allows users to view, add, delete contacts stored in the cloud service at http://cloudguest116.niksula.hut.fi. Also, phone contacts can be picked and stored to the cloud service as well as cloud contacts stored to the phone.
+
+All the functionalities are performed using the API created during the previous assignments.
+
+NOTE: Server can be accessed at http://cloudguest116.niksula.hut.fi:8080/
+
+API Structure used by App
+User actions: 
+
+Add contact 
+POST /contacts 
+body: ContactObj 
+return: {success:[0|1]} 
+
+Delete contact 
+DELETE /contacts/:contact_id 
+return: {success:[0|1]} 
+
+Show all contacts 
+GET /contacts 
+return: {contacts:[contactObj, contactObj, ... ] } 
+
+contactObj = { 
+	first_name: string, 
+	last_name: string, 
+	phone: string, 
+	mobile: string, 
+	email: string, 
+	address: string, 
+	_id: string, 
+	__v: number 
+} 
+
+App Installation 
+
+For the installation of the application package (.apk) first you need to enable the installation of applications coming from unknown sources.
+
+In your Android device go to Settings → Security → Unknown sources
+
+and check the option to allow unknown sources.
+
+After that, you have to locate the .apk file in your SD card or phone memory and install it, giving permissions for:
+- Internet
+- Contacts
+
+
+App Usage
+
+On the main screen all the contacts stored in the cloud are retrieved and presented to the user.
+Option to Pick Contact from the phone and add it to the cloud is presented in this view.
+Refresh and Add Contact are presented in this view.
+
+Clicking on a contact, the view is changed to offer more details about that contact.
+Options to Delete and Save to phone are presented to the user to remove the contact from the cloud service or to save it to the phone contacts.
+
+Adding a contact to the cloud service is performed under the Add Contact option in the main menu.
+A new view is presented to the user to add the information to the contact and a button to save the contact.
